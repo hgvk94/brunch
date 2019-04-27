@@ -152,12 +152,6 @@ class LogScrabber (object):
             except:
                 print ("[WARNING]: exception for:", line)
                 print ("Unexpected error:", sys.exc_info())
-
-    def _processTime(self,time):
-        minutes=int(time.split('m')[0])
-        seconds=float(time.split('m')[1].split('s')[0])
-        return minutes*60+seconds
-
     def _processFile (self, fname):
         '''process a single file'''
         base_name = os.path.basename (fname)
@@ -168,24 +162,6 @@ class LogScrabber (object):
             with open (fname) as input:
                 for line in input:
                     self._scrab (name, line.strip ())
-        elif base_name.endswith('.aig.err'):
-            sysTime=None
-            userTime=None
-            with open (fname) as input:
-                for line in input:
-                    if 'user' in line:
-                        userTime=line.strip().split()[1]
-                    elif 'sys' in line:
-                        sysTime=line.strip().split()[1]
-                    elif line.strip() and not 'real' in line :
-                        print ("[ERROR]: Content in error file for:", base_name)
-                        print (line)
-            if not ( userTime or sysTime ):
-                print ("[ERROR]: No timeout information in error file for:", base_name)
-            else:
-                time=self._processTime(userTime)+self._processTime(sysTime)
-                name, _ext = os.path.splitext (name)
-                self.add_record (name, "execution_time", time)
 
     def _processDir (self, root):
         '''Recursively process all files in the root directory'''
