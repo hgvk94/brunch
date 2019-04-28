@@ -101,6 +101,41 @@ class BrunchStat (object):
         except:
             return None
 
+class kindResultMatch (object):
+    def __init__ (self):
+        pass
+    def match (self, line):
+        try:
+            if not line.startswith ("Networks are equivalent"):
+                return None
+            return ("Result", "UNSAT")
+        except:
+            return None
+
+class kindBMCResultMatch (object):
+    def __init__ (self):
+        pass
+    def match (self, line):
+        try:
+            if not line.startswith ("No output asserted"):
+                return None
+            bmcdepth=int(line.split()[4])
+            return ("BMCResult",bmcdepth)
+        except:
+            return None
+
+class kindUniqueConst (object):
+    def __init__ (self):
+        pass
+    def match (self, line):
+        try:
+            if not "uniqueness constraints" in line:
+                return None
+            uniqConstr=int(line.split()[5])
+            return ("uniqConstr",uniqConstr)
+        except:
+            return None
+
 def _escape (s):
     s = s.replace ('.', '_').replace ('-', '_')
     return s
@@ -115,18 +150,10 @@ class LogScrabber (object):
         self.__init_matchers ()
 
     def __init_matchers (self):
-        # self.matchers.append (ExactMatch ('result',
-        #                                   ['sat','unsat','timeout','unknown']))
-        # self.matchers.append (MemoryExcMatch ('result'))
-        # self.matchers.append (ErrorExcMatch ('result'))
-        # self.matchers.append (ExitStatus ())
-        # self.matchers.append (CpuTime ())
+        self.matchers.append (kindUniqueConst ())
+        self.matchers.append (kindBMCResultMatch ())
+        self.matchers.append (kindResultMatch ())
         self.matchers.append (BrunchStat ())
-        # regex = ':(?P<fld>[a-zA-Z0-9_.-]+)\s+(?P<val>\d+(:?[.]\d+)?)'
-        # flt = PrefixFilter (['SPACER-', 'time', 'virtual_solver',
-                             # 'memory', 'max-memory'])
-        # reMatch = ReMatch(regex=regex, filt=flt)
-        # self.matchers.append (reMatch)
 
 
     def mk_arg_parser (self, ap):
@@ -163,7 +190,7 @@ class LogScrabber (object):
         base_name = os.path.basename (fname)
 
         name, _ext = os.path.splitext (base_name)
-        
+
         if base_name.endswith('.aig'):
             with open (fname) as input:
                 for line in input:

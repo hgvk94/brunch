@@ -16,13 +16,16 @@ def plotCactus(files):
 		matplotlib.pyplot.plot(np.array(sorted(col)),label=fName,marker=markers[i%len(markers)])
 
 	matplotlib.pyplot.legend()
-	matplotlib.pyplot.savefig("cactus.png")
+	matplotlib.pyplot.savefig(out_file)
 
 def run (args=None):
-        plotCactus(args.files)
+        plotCactus(args.files, args.out_file)
         return 0
 def main ():
         import argparse
+        ap.add_argument ('-o', dest='out_file',
+                         metavar='FILE', help='Output file name',
+                         default='cactus.png')
 
         ap = argparse.ArgumentParser ()
         ap.add_argument ('-f',dest='files', metavar='FILE',
