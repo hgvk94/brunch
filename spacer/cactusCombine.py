@@ -4,7 +4,7 @@ import numpy as np
 import sys
 import os
 import os.path
-def plotCactus(files):
+def plotCactus(files, out_file):
 	matplotlib.pyplot.axis('auto')
 	matplotlib.pyplot.xlabel("Instances")
 	matplotlib.pyplot.ylabel("Time taken (s)")
