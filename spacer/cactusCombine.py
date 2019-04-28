@@ -23,13 +23,12 @@ def run (args=None):
         return 0
 def main ():
         import argparse
-        ap.add_argument ('-o', dest='out_file',
-                         metavar='FILE', help='Output file name',
-                         default='cactus.png')
-
         ap = argparse.ArgumentParser ()
         ap.add_argument ('-f',dest='files', metavar='FILE',
                          help='the files to be compared', nargs='+')
+        ap.add_argument ('-o', dest='out_file',
+                         metavar='FILE', help='Output file name',
+                         default='cactus.png')
         args = ap.parse_args (sys.argv[1:])
         return run (args)
 
