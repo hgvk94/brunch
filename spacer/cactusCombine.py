@@ -11,7 +11,7 @@ def plotCactus(files, out_file):
 	markers=['p','s','o','*','v']
 	for i,f in enumerate(files):
 		df=pandas.read_csv(f);
-		fName,ext=os.path.splitext(f)
+		fName,ext=os.path.splitext(os.path.basename(f))
 		col=df[df["Result"]=="UNSAT"]["execution_time"]
 		matplotlib.pyplot.plot(np.array(sorted(col)),label=fName,marker=markers[i%len(markers)])
 
