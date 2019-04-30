@@ -52,14 +52,12 @@ def plotScatter(f1, f2, a, out):
 
 
 def run (args=None):
-		f1=args.f1[0]
-		f2=args.f2[0]
-        out=args.out[0]
-		if args.fields is not None:
-			for a in ["execution_time, Depth"]:
-				print(a)
-				plotScatter(f1, f2, a, out)
-		return 0
+    f1=args.f1[0]
+    f2=args.f2[0]
+    out=args.out[0]
+    for a in ["execution_time, Depth"]:
+		plotScatter(f1, f2, a, out)
+    return 0
 def main ():
 		import argparse
 
