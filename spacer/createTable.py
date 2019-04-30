@@ -1,3 +1,4 @@
+from __future__ import print_function
 from functools import reduce
 import pandas
 import sys
@@ -31,10 +32,6 @@ def printRunningTime(f,a):
 def printRow(f1,f2,f3,a):
 		files = [f1,f2,f3];
 		print("%s"%(a),end =" ");
-		# for f in files:
-		# 	df=pandas.read_csv(f+'-'+a+'.csv');
-		# 	print("&{:s}&{:s}".format(str(len(df[df["Result"]=="UNSAT"])),str(len(df[df["Result"]=="SAT"]))),end =" ")
-			# print("&{:.2f}/{:.2f}".format(((df[ (df["Result"]=="UNSAT")]["execution_time"].sum())),((df[df["Result"]=="SAT"]["execution_time"].sum()))),end =" ")
 		printSATColumn(f1,f2,f3,a)
 		printRunningTime(f1,a)
 		printSATColumn(f2,f3,f1,a)
@@ -47,23 +44,22 @@ def printRow(f1,f2,f3,a):
 		vbsUnSafe=cdf[(cdf["Result"]=="SAT") | (cdf["Result_y"]=="SAT") | (cdf["Result_x"]=="SAT") ]
 		vbsSafeSolved=str(len(vbsSafe))
 		vbsUnSafeSolved=str(len(vbsUnSafe))
-		# rt=0
-		# for i,f in vbsSafe.iterrows():
-		# 	rt=rt+min(f["execution_time_x"],f["execution_time_y"],f["execution_time"])
-		# for i,f in vbsUnSafe.iterrows():
-		# 	rt=rt+min(f["execution_time_x"],f["execution_time_y"],f["execution_time"])
-		# rt=rt/60
-		# print("&${:s}$&${:s}$&${:d}$\\\\".format(vbsSafeSolved,vbsUnSafeSolved,int(round(rt))))
 		print("&${:s}$&${:s}$\\\\".format(vbsSafeSolved,vbsUnSafeSolved))
 
 def run (args=None):
         f1=args.f1[0]
         f2=args.f2[0]
         f3=args.f3[0]
-        for a in args.classes:
+        print("\\begin{tabular}{|c|c|c|c|c|c|c|c|c|c||c|c|}")
+	print("\\hline")
+	print("BENCHMARKS &\\multicolumn{3}{|c|}{%s}& \\multicolumn{3}{|c|}{%s}& \\multicolumn{3}{|c|}{%s}&  \\multicolumn{2}{|c|}{VBS}\\\\"%(os.path.basename(f1),os.path.basename(f2),os.path.basename(f3)))
+	print("\\cline{2-12}")
+	print("SAFE & UNSAFE & TIME(m) & SAFE & UNSAFE & TIME(m) & SAFE & UNSAFE & TIME(m) & SAFE & UNSAFE \\\\")
+	for a in args.classes:
         	print("\\hline")
         	printRow(f1,f2,f3,a)
         print("\\hline")
+        print("\\end{tabular}")
         return 0
 def main ():
         import argparse
