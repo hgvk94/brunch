@@ -10,7 +10,7 @@ import numpy
 # usage
 # python ScatterPlots.py -f1 file1.csv -f2 file2.csv -o dir
 # will create 2 plots under the out directory. They will be named file1-file2-Depth/execution-time.png
-# compares instances solved by atleast one of the solvers
+# compares instances solved by both of the solvers
 
 def plotScatter(f1, f2, a, out):
 		f1Name,ext=os.path.splitext(os.path.basename(f1))
@@ -31,7 +31,7 @@ def plotScatter(f1, f2, a, out):
 
 		#SOLVED instances
 		matplotlib.pyplot.axis('auto')
-		solvedInst=combinedDF[ ( combinedDF["Result_x"]=="SAT" ) | ( combinedDF["Result_y"]=="SAT" ) | ( combinedDF["Result_x"]=="UNSAT" ) | ( combinedDF["Result_y"]=="UNSAT" ) ]
+		solvedInst=combinedDF[ ( ( combinedDF["Result_x"]=="SAT" ) & ( combinedDF["Result_y"]=="SAT" ) ) | ( ( combinedDF["Result_x"]=="UNSAT" ) & ( combinedDF["Result_y"]=="UNSAT" ) ) ]
 		matplotlib.pyplot.scatter(x= solvedInst[a+"_x"],y=solvedInst[a+"_y"],c=solvedInst["color"])
 		x_vals = numpy.array(matplotlib.pyplot.gca().get_xlim())
 		matplotlib.pyplot.plot(x_vals, x_vals, '--',c='black')
