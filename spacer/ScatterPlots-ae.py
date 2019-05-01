@@ -32,6 +32,9 @@ def plotScatter(f1, f2, a, out):
 		#SOLVED instances
 		matplotlib.pyplot.axis('auto')
 		solvedInst=combinedDF[ ( ( combinedDF["Result_x"]=="SAT" ) & ( combinedDF["Result_y"]=="SAT" ) ) | ( ( combinedDF["Result_x"]=="UNSAT" ) & ( combinedDF["Result_y"]=="UNSAT" ) ) ]
+		if solvedInst.shape[0] == 0 :
+			print("Nothing solved for " + f1Name + " vs  "  + f2Name )
+			exit(0)
 		matplotlib.pyplot.scatter(x= solvedInst[a+"_x"],y=solvedInst[a+"_y"],c=solvedInst["color"])
 		x_vals = numpy.array(matplotlib.pyplot.gca().get_xlim())
 		matplotlib.pyplot.plot(x_vals, x_vals, '--',c='black')
