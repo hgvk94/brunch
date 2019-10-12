@@ -121,7 +121,6 @@ class LogScrabber (object):
         self.matchers.append (ErrorExcMatch ('result'))
         self.matchers.append (ExitStatus ())
         self.matchers.append (CpuTime ())
-        self.matchers.append (BrunchStat ())
         regex = ':(?P<fld>[a-zA-Z0-9_.-]+)\s+(?P<val>\d+(:?[.]\d+)?)'
         flt = PrefixFilter (['SPACER-', 'time', 'virtual_solver',
                              'memory', 'max-memory'])
@@ -150,21 +149,39 @@ class LogScrabber (object):
                 if res is not None:
                     self.add_record (name, res[0], res[1])
             except:
-                print '[WARNING]: exception for:', line
-                print "Unexpected error:", sys.exc_info()
+                print ("[WARNING]: exception for:", line)
+                print ("Unexpected error:", sys.exc_info())
+
+    def _processTime(self,time):
+        minutes=int(time.split('m')[0])
+        seconds=float(time.split('m')[1].split('s')[0])
+        return minutes*60+seconds
+
     def _processFile (self, fname):
         '''process a single file'''
-
         base_name = os.path.basename (fname)
 
-        if base_name.endswith ('.smt2'):
-            name = base_name
-        else:
-            name, _ext = os.path.splitext (base_name)
+        name, _ext = os.path.splitext (base_name)
 
-        with open (fname) as input:
-            for line in input:
-                self._scrab (name, line.strip ())
+        if base_name.endswith('.smt2.out') :
+            with open (fname) as input:
+                for line in input:
+                    self._scrab (name, line.strip ())
+        elif base_name.endswith('.smt2.err.err'):
+            sysTime=None
+            userTime=None
+            with open (fname) as input:
+                for line in input:
+                    if 'user' in line:
+                        userTime=line.strip().split()[1]
+                    elif 'sys' in line:
+                        sysTime=line.strip().split()[1]
+            if not ( userTime or sysTime ):
+                print ("[ERROR]: No timeout information in error file for:", base_name)
+            else:
+                time=self._processTime(userTime)+self._processTime(sysTime)
+                name, _ext = os.path.splitext (name)
+                self.add_record (name, "execution_time", time)
 
     def _processDir (self, root):
         '''Recursively process all files in the root directory'''
@@ -184,7 +201,7 @@ class LogScrabber (object):
         df = pandas.DataFrame (self.store)
 
         def _last_fn (a):
-            return a.get_value (a.last_valid_index ())
+            return a.at[a.last_valid_index ()]
 
         ## use pivot_table with aggfunc that picks the first value
         df = df.pivot_table (index='index',
