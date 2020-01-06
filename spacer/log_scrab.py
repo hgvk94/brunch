@@ -163,6 +163,10 @@ class LogScrabber (object):
 
         name, _ext = os.path.splitext (base_name)
 
+        if base_name.endswith('.smt2.err') :
+            with open (fname) as input:
+                for line in input:
+                    self._scrab (name, line.strip ())
         if base_name.endswith('.smt2.out') :
             with open (fname) as input:
                 for line in input:
