@@ -27,6 +27,8 @@ def preprocess(df, a):
 
 
 def plotScatter(f1, f2, a, bench):
+        f1Name, _ = os.path.splitext(f1);
+        f2Name, _ = os.path.splitext(f2);
         df1 = pandas.read_csv(f1);
         df1 = flt_index(df1, bench);
         df1 = preprocess(df1, a);
@@ -37,23 +39,31 @@ def plotScatter(f1, f2, a, bench):
         assert(len(combinedDF.query('( (result_x == "sat") & (result_y == "unsat") ) | ((result_x == "unsat") & (result_y == "sat"))')) == 0);
         phi = combinedDF[combinedDF['result_x'].isin(["sat", "unsat"]) | combinedDF['result_y'].isin(["sat", "unsat"])].copy();
         gt=[]
+        st=[]
         for n, r in phi.iterrows():
                 if(r['result_x'] == "sat" or r['result_y'] == "sat"):
                         gt.append("sat")
                 else:
                         gt.append("unsat")
+                if(r['result_x'] != "timeout" and r['result_y'] != "timeout"):
+                        st.append("both")
+                elif(r['result_x'] == "timeout"):
+                        st.append("only by " + f2Name)
+                else:
+                        st.append("only by " + f1Name)
         phi.loc[:, "grnd_trth"] = gt;
+        phi.loc[:, "solved_by"] = st;
         fig = plt.figure(figsize=(10,10));
         plt.axis('auto')
         sns.set(style = 'ticks', palette = 'Set2')
-        g = sns.scatterplot(x= a + "_x", y= a + "_y", hue = "grnd_trth", data = phi);
+        g = sns.scatterplot(x= a + "_x", y= a + "_y", style = "grnd_trth", hue = "solved_by", data = phi);
         sns.despine()
-        x = numpy.linspace(-5, 950, 2)
+        x = numpy.linspace(0, max(phi[a+"_x"]), 2)
         g.plot(x, x)
         # plt.show()
-        f1Name, _ = os.path.splitext(f1);
-        f2Name, _ = os.path.splitext(f2);
-        plt.savefig("plots/"+f1Name+f2Name+a+".svg")
+        plt.xlabel(f1Name + " " + a)
+        plt.ylabel(f2Name + " " + a)
+        plt.savefig("plots/" + f1Name + f2Name + a + ".svg")
 def run (args=None):
         f1 = args.f1[0]
         f2 = args.f2[0]
