@@ -6,12 +6,14 @@ import pytabular as pytab
 #input benchmark string
 #output latex table containing the performance of the solvers on the benchmarks
 def flt_index(df, s):
-    return df[df['index'].str.startswith(s)]
+    return df[df['index'].str.startswith(s)].copy()
 
 def preprocess(df):
-        d = df[["index","result"]]
-        d['result'].fillna(value="timeout", inplace=True)
-        d.replace(["unknown, error"], "timeout", inplace = True)
+        d = df[["index","result"]].copy()
+        d.loc[d['result'].isna(), 'result'] = "timeout"
+        d.loc[d['result'] == "error", 'result'] = "timeout"
+        d.loc[d['result'] == "unknown", 'result'] = "timeout"
+        assert(len(d[~d['result'].isin(["sat", "unsat", "timeout"])]) == 0)
         return d;
 
 def run (args=None):
@@ -59,12 +61,10 @@ def run (args=None):
             if unsats[i] == max_unsat:
                 b_row.append(2*i + 2);
         bold.append(b_row)
-        print(b_row)
         tabular = pytab.vstack(tabular, t_row)
     #set bold
     for r in range(len(bold)):
         for j in bold[r]:
-            print(j)
             tabular[r + len(hdr), j].set_bold();
     print("\n\n")
     tabular[0].set_lines(1)
