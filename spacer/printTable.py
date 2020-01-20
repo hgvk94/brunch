@@ -15,7 +15,12 @@ def preprocess(df):
         d.loc[d['result'] == "unknown", 'result'] = "timeout"
         assert(len(d[~d['result'].isin(["sat", "unsat", "timeout"])]) == 0)
         return d;
-
+def rename_result_column(df, a):
+    d = df[["index", "result"]].copy()
+    d = d.rename(columns={"result": ("result" + a)})
+    return d
+def v_best(df, res):
+    return df[df.isin([res]).any(axis=1)]
 def run (args=None):
     print("Comparing ");
     dfs=[];
@@ -25,6 +30,11 @@ def run (args=None):
         print(a + ", ");
         df = pandas.read_csv(a);
         df = preprocess(df);
+        fName, _ = os.path.splitext(a)
+        if len(dfs) == 0:
+            comb = rename_result_column(df, fName)
+        else:
+            comb = pandas.merge(comb, rename_result_column(df, fName), how = "inner", on = "index")
         dfs.append(df)
         hdr_f.append(os.path.splitext(a)[0])
         hdr_f.append("")
@@ -72,7 +82,12 @@ def run (args=None):
     for i in range(1 , len(hdr_f), 2):
         tabular[0, i:i+2].merge(force = True);
     print(tabular)
-
+    for a in args.bench:
+        comb_flt = flt_index(comb, a)
+        sat = len(v_best(comb_flt, "sat"))
+        unsat = len(v_best(comb_flt, "unsat"))
+        print("virtual best sat " + str(sat))
+        print("virtual best unsat " + str(unsat))
 def main ():
         import argparse
 

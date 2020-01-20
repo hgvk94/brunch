@@ -20,9 +20,9 @@ def preprocess(df, a):
         d.loc[d['result'].isna(), ['result']] = "timeout"
         d.loc[d['result'] == "error", ['result']] = "timeout"
         d.loc[d['result'] == "unknown", ['result']] = "timeout"
-        d.loc[d['time'].isna(), ['time']] = 900;
+        d.loc[d['time'].isna(), ['time']] = 600;
         assert(len(d[~d['result'].isin(["sat", "unsat", "timeout"])]) == 0)
-        d.loc[d["result"] == "timeout", ["time"]] = 900;
+        d.loc[d["result"] == "timeout", ["time"]] = 600;
         return d;
 
 
@@ -42,28 +42,34 @@ def plotScatter(f1, f2, a, bench):
         st=[]
         for n, r in phi.iterrows():
                 if(r['result_x'] == "sat" or r['result_y'] == "sat"):
-                        gt.append("sat")
+                        gt.append("safe")
                 else:
-                        gt.append("unsat")
+                        gt.append("unsafe")
                 if(r['result_x'] != "timeout" and r['result_y'] != "timeout"):
-                        st.append("both")
+                        st.append("Both")
                 elif(r['result_x'] == "timeout"):
-                        st.append("only by " + f2Name)
+                        st.append(f2Name + " only")
                 else:
-                        st.append("only by " + f1Name)
-        phi.loc[:, "grnd_trth"] = gt;
-        phi.loc[:, "solved_by"] = st;
-        fig = plt.figure(figsize=(10,10));
+                        st.append(f1Name + " only")
+        phi.loc[:, "Ground Truth"] = gt;
+        phi.loc[:, "Solved By"] = st;
         plt.axis('auto')
         sns.set(style = 'ticks', palette = 'Set2')
-        g = sns.scatterplot(x= a + "_x", y= a + "_y", style = "grnd_trth", hue = "solved_by", data = phi);
+        g = sns.scatterplot(x= a + "_x", y= a + "_y", style = "Ground Truth", hue = "Solved By", data = phi, s = 100);
         sns.despine()
         x = numpy.linspace(0, max(phi[a+"_x"]), 2)
         g.plot(x, x)
         # plt.show()
-        plt.xlabel(f1Name + " " + a)
-        plt.ylabel(f2Name + " " + a)
-        plt.savefig("plots/" + f1Name + f2Name + a + ".svg")
+        params = {
+            'font.family' : 'serif'
+        }
+        plt.rcParams.update(params)
+        plt.legend(loc = "upper right", framealpha = 1, fontsize = 8)
+
+        plt.xlabel(f1Name + " " + a, fontsize = 12)
+        plt.ylabel(f2Name + " " + a, fontsize = 12)
+        plt.savefig("plots/" + f1Name + f2Name + a + ".ps")
+        plt.close()
 def run (args=None):
         f1 = args.f1[0]
         f2 = args.f2[0]
